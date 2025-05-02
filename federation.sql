@@ -11,7 +11,8 @@ CREATE TABLE player (
     national_id_or_passport VARCHAR(20) NOT NULL,
     nationality VARCHAR(20) NOT NULL,
     free BOOL NOT NULL ,
-    FOREIGN KEY (national_id_or_passport,nationality) REFERENCES person(national_id_or_passport,nationality),
+    UNIQUE ( national_id_or_passport , nationality),
+    FOREIGN KEY (national_id_or_passport,nationality) REFERENCES person(national_id_or_passport,nationality) ON DELETE CASCADE ,
     PRIMARY KEY (player_id)
 );
 CREATE TABLE staff (
@@ -19,15 +20,17 @@ CREATE TABLE staff (
     national_id_or_passport VARCHAR(20) NOT NULL,
     nationality VARCHAR(20) NOT NULL,
     post VARCHAR(20) NOT NULL ,
-    FOREIGN KEY (national_id_or_passport,nationality) REFERENCES person(national_id_or_passport,nationality),
+    UNIQUE ( national_id_or_passport , nationality),
+    FOREIGN KEY (national_id_or_passport,nationality) REFERENCES person(national_id_or_passport,nationality) ON DELETE CASCADE ,
     PRIMARY KEY (staff_id,post)
 );
 CREATE TABLE referee (
     referee_id SERIAL,
     national_id_or_passport VARCHAR(20) NOT NULL,
     nationality VARCHAR(20) NOT NULL,
-    level VARCHAR(20) NOT NULL ,
-    FOREIGN KEY (national_id_or_passport,nationality) REFERENCES person(national_id_or_passport,nationality),
+    UNIQUE (national_id_or_passport , nationality),
+    level referee_level NOT NULL ,
+    FOREIGN KEY (national_id_or_passport,nationality) REFERENCES person(national_id_or_passport,nationality) ON DELETE CASCADE ,
     PRIMARY KEY (referee_id)
 );
 
@@ -39,7 +42,7 @@ CREATE TABLE team (
     PRIMARY KEY (team_id)
 );
 
-CREATE TABLE STADIUM
+CREATE TABLE stadium
 (
     stadium_id       SERIAL,
     ticket_price     INT           NOT NULL,
@@ -51,6 +54,8 @@ CREATE TABLE STADIUM
     stadium_features TEXT          NOT NULL,
     PRIMARY KEY (stadium_id)
 );
+
+
 
 CREATE TABLE league
 (
@@ -82,8 +87,8 @@ CREATE TABLE team_season (
     team_id INT NOT NULL,
     point SMALLINT NOT NULL DEFAULT 0,
     rank SMALLINT NOT NULL,
-    FOREIGN KEY (team_id) REFERENCES team(team_id),
-    FOREIGN KEY (season_id) REFERENCES season(season_id),
+    FOREIGN KEY (team_id) REFERENCES team(team_id) ON DELETE CASCADE ,
+    FOREIGN KEY (season_id) REFERENCES season(season_id) ON DELETE CASCADE ,
     PRIMARY KEY (team_season_id)
 );
 
@@ -101,27 +106,28 @@ CREATE TABLE foreign_transfer(
     player_id INT NOT NULL,
     player_monthly_wage INT NOT NULL,
     type transfer_type NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(player_id),
-    FOREIGN KEY (internal_team_id) REFERENCES team_season(team_season_id),
+    FOREIGN KEY (player_id) REFERENCES player(player_id) ON DELETE CASCADE ,
+    FOREIGN KEY (internal_team_id) REFERENCES team_season(team_season_id) ON DELETE CASCADE ,
     PRIMARY KEY (foreign_team_name,foreign_team_country,internal_team_id,player_id)
 );
+
 
 CREATE TABLE internal_transfer(
     seller_id INT NOT NULL,
     buyer_id INT NOT NULL,
     player_id INT NOT NULL,
     player_monthly_wage INT NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(player_id),
-    FOREIGN KEY (seller_id) REFERENCES team_season(team_season_id),
-    FOREIGN KEY (buyer_id) REFERENCES team_season(team_season_id),
+    FOREIGN KEY (player_id) REFERENCES player(player_id) ON DELETE CASCADE ,
+    FOREIGN KEY (seller_id) REFERENCES team_season(team_season_id) ON DELETE CASCADE ,
+    FOREIGN KEY (buyer_id) REFERENCES team_season(team_season_id)  ON DELETE CASCADE ,
     PRIMARY KEY (seller_id,buyer_id,player_id)
 );
 
 CREATE TABLE termination_contract (
     team_season_id INT NOT NULL,
     player_id INT NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(player_id),
-    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id),
+    FOREIGN KEY (player_id) REFERENCES player(player_id) ON DELETE CASCADE ,
+    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id) ON DELETE CASCADE ,
     PRIMARY KEY (team_season_id,player_id)
 );
 
@@ -129,8 +135,8 @@ CREATE TABLE buy_free_player (
     team_season_id INT NOT NULL,
     player_id INT NOT NULL,
     player_monthly_wage INT NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(player_id),
-    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id),
+    FOREIGN KEY (player_id) REFERENCES player(player_id) ON DELETE CASCADE ,
+    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id) ON DELETE CASCADE ,
     PRIMARY KEY (team_season_id,player_id)
 );
 
@@ -139,8 +145,8 @@ CREATE TABLE contract (
     team_season_id INT NOT NULL,
     player_id INT NOT NULL,
     player_monthly_wage INT NOT NULL,
-    FOREIGN KEY (player_id) REFERENCES player(player_id),
-    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id),
+    FOREIGN KEY (player_id) REFERENCES player(player_id) ON DELETE CASCADE ,
+    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id) ON DELETE CASCADE ,
     PRIMARY KEY (contract_id)
 );
 
@@ -158,9 +164,9 @@ CREATE TABLE team_game (
 
 CREATE TABLE game (
     game_id SERIAL,
-    home_team_game_id INT NOT NULL REFERENCES team_game(team_game_id) ON DELETE CASCADE,
-    away_team_game_id INT NOT NULL REFERENCES team_game(team_game_id) ON DELETE CASCADE,
-    stadium_id INT NOT NULL REFERENCES STADIUM(stadium_id) ON DELETE CASCADE,
+    home_team_game_id INT NOT NULL REFERENCES team_game(team_game_id) ON DELETE RESTRICT ,
+    away_team_game_id INT NOT NULL REFERENCES team_game(team_game_id) ON DELETE RESTRICT ,
+    stadium_id INT NOT NULL REFERENCES stadium(stadium_id) ON DELETE NO ACTION ,
     week_id INT NOT NULL REFERENCES week(week_id) ON DELETE CASCADE,
     game_date DATE NOT NULL,
     result VARCHAR(20) NOT NULL CHECK ( result LIKE '[0-9]{1,2}:[0-9]{1,2}' ),
@@ -172,8 +178,8 @@ CREATE TABLE player_game (
     team_game_id INT NOT NULL,
     contract_id INT NOT NULL,
     type player_game_type NOT NULL,
-    FOREIGN KEY (team_game_id) REFERENCES team_game(team_game_id),
-    FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
+    FOREIGN KEY (team_game_id) REFERENCES team_game(team_game_id) ON DELETE CASCADE ,
+    FOREIGN KEY (contract_id) REFERENCES contract(contract_id) ON DELETE CASCADE ,
     PRIMARY KEY (player_game_id)
 );
 
@@ -181,7 +187,7 @@ CREATE TABLE event(
     event_id SERIAL,
     game_id INT NOT NULL,
     minute VARCHAR(2) NOT NULL CHECK (minute LIKE '[0-9]{1,2}'),
-    FOREIGN KEY (game_id) REFERENCES game(game_id),
+    FOREIGN KEY (game_id) REFERENCES game(game_id) ON DELETE CASCADE ,
     PRIMARY KEY (event_id)
 );
 
@@ -189,16 +195,52 @@ CREATE TABLE staff_membership(
     staff_membership_id SERIAL,
     staff_id INT NOT NULL REFERENCES staff(staff_id) ON DELETE CASCADE,
     team_game_id INT NOT NULL REFERENCES team_game(team_game_id) ON DELETE CASCADE,
-    post VARCHAR(20) NOT NULL
+    post VARCHAR(20) NOT NULL,
+    PRIMARY KEY (staff_membership_id)
 );
 
+CREATE TABLE referee_team(
+    referee_team_id SERIAL,
+    game_id INT NOT NULL REFERENCES game(game_id) ON DELETE CASCADE ,
+    first_referee_id INT NOT NULL REFERENCES referee(referee_id) ON DELETE RESTRICT ,
+    second_referee_id INT NOT NULL REFERENCES referee(referee_id) ON DELETE RESTRICT ,
+    third_referee_id INT NOT NULL REFERENCES referee(referee_id) ON DELETE RESTRICT ,
+    forth_referee_id INT NOT NULL REFERENCES referee(referee_id) ON DELETE RESTRICT ,
+    observer_referee_id INT NOT NULL REFERENCES referee(referee_id) ON DELETE RESTRICT ,
+    first_referee_score INT ,
+    second_referee_score INT ,
+    third_referee_score INT ,
+    forth_referee_score INT
+);
+
+CREATE TABLE staff_red_card(
+    event_id INT REFERENCES event(event_id) ON DELETE CASCADE ,
+    staff_membership_id INT NOT NULL REFERENCES staff_membership(staff_membership_id) ON DELETE NO ACTION ,
+    is_second_yellow_card BOOL NOT NULL DEFAULT false
+);
+
+CREATE TABLE staff_yellow_card(
+    event_id INT REFERENCES event(event_id) ON DELETE CASCADE ,
+   staff_membership_id INT NOT NULL REFERENCES staff_membership(staff_membership_id) ON DELETE NO ACTION
+);
+
+CREATE TABLE player_red_card(
+    event_id INT REFERENCES event(event_id) ON DELETE CASCADE ,
+    player_game_id INT NOT NULL REFERENCES player_game(player_game_id) ON DELETE NO ACTION ,
+    is_second_yellow_card BOOL NOT NULL DEFAULT false
+);
+
+CREATE TABLE player_yellow_card(
+    event_id INT REFERENCES  event(event_id) ON DELETE CASCADE ,
+    player_game_id INT NOT NULL REFERENCES player_game(player_game_id) ON DELETE NO ACTION
+);
 CREATE TABLE foul (
     event_id INT NOT NULL,
     fouler_id INT NOT NULL,
-    fouled_id INT,
-    FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (fouler_id) REFERENCES player_game(player_game_id),
-    FOREIGN KEY (fouled_id) REFERENCES player_game(player_game_id),
+    fouled_id INT , -- may be hand foul
+    FOREIGN KEY (event_id) REFERENCES event(event_id) ON DELETE CASCADE ,
+    FOREIGN KEY (fouler_id) REFERENCES player_game(player_game_id) ON DELETE NO ACTION ,
+    FOREIGN KEY (fouled_id) REFERENCES player_game(player_game_id) ON DELETE NO ACTION ,
     PRIMARY KEY (event_id)
 );
 
@@ -206,8 +248,8 @@ CREATE TABLE goal_score (
     event_id INT NOT NULL,
     goal_scorer_id INT NOT NULL,
     penalty BOOL NOT NULL,
-    FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (goal_scorer_id) REFERENCES player_game(player_game_id),
+    FOREIGN KEY (event_id) REFERENCES event(event_id) ON DELETE CASCADE ,
+    FOREIGN KEY (goal_scorer_id) REFERENCES player_game(player_game_id) ON DELETE NO ACTION ,
     PRIMARY KEY (event_id)
 );
 
@@ -215,12 +257,14 @@ CREATE TABLE substitution (
     event_id INT NOT NULL,
     player_in_id INT NOT NULL,
     player_out_id INT NOT NULL,
-    FOREIGN KEY (event_id) REFERENCES event(event_id),
-    FOREIGN KEY (player_in_id) REFERENCES player_game(player_game_id),
-    FOREIGN KEY (player_out_id) REFERENCES player_game(player_game_id),
+    FOREIGN KEY (event_id) REFERENCES event(event_id) ON DELETE CASCADE ,
+    FOREIGN KEY (player_in_id) REFERENCES player_game(player_game_id)  ON DELETE NO ACTION ,
+    FOREIGN KEY (player_out_id) REFERENCES player_game(player_game_id) ON DELETE NO ACTION ,
     PRIMARY KEY (event_id)
 );
+
 
 CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
 CREATE TYPE player_game_type AS ENUM ('substitute' , 'in-game');
 CREATE TYPE transfer_type AS ENUM ('buy' , 'sell');
+CREATE TYPE referee_level AS ENUM ('international' , 'local' , 'regional' , 'national');
