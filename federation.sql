@@ -52,9 +52,6 @@ CREATE TABLE STADIUM
     PRIMARY KEY (stadium_id)
 );
 
-CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
-
-
 CREATE TABLE league
 (
     league_name VARCHAR(20) NOT NULL,
@@ -187,7 +184,6 @@ CREATE TABLE event(
     FOREIGN KEY (game_id) REFERENCES game(game_id),
     PRIMARY KEY (event_id)
 );
-CREATE TYPE player_game_type AS ENUM ('substitute' , 'in-game');
 
 CREATE TABLE staff_membership(
     staff_membership_id SERIAL,
@@ -196,5 +192,35 @@ CREATE TABLE staff_membership(
     post VARCHAR(20) NOT NULL
 );
 
+CREATE TABLE foul (
+    event_id INT NOT NULL,
+    fouler_id INT NOT NULL,
+    fouled_id INT,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (fouler_id) REFERENCES player_game(player_game_id),
+    FOREIGN KEY (fouled_id) REFERENCES player_game(player_game_id),
+    PRIMARY KEY (event_id)
+);
 
+CREATE TABLE goal_score (
+    event_id INT NOT NULL,
+    goal_scorer_id INT NOT NULL,
+    penalty BOOL NOT NULL,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (goal_scorer_id) REFERENCES player_game(player_game_id),
+    PRIMARY KEY (event_id)
+);
+
+CREATE TABLE substitution (
+    event_id INT NOT NULL,
+    player_in_id INT NOT NULL,
+    player_out_id INT NOT NULL,
+    FOREIGN KEY (event_id) REFERENCES event(event_id),
+    FOREIGN KEY (player_in_id) REFERENCES player_game(player_game_id),
+    FOREIGN KEY (player_out_id) REFERENCES player_game(player_game_id),
+    PRIMARY KEY (event_id)
+);
+
+CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
+CREATE TYPE player_game_type AS ENUM ('substitute' , 'in-game');
 CREATE TYPE transfer_type AS ENUM ('buy' , 'sell');
