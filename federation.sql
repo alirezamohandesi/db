@@ -38,3 +38,44 @@ CREATE TABLE team (
     city VARCHAR(50) NOT NULL,
     PRIMARY KEY (team_id)
 );
+
+CREATE TABLE STADIUM
+(
+    stadium_id       SERIAL,
+    ticket_price     INT           NOT NULL,
+    stadium_city     VARCHAR(20)   NOT NULL,
+    stadium_name     VARCHAR(20)   NOT NULL,
+    stadium_level    stadium_level NOT NULL,
+    stadium_capacity INT           NOT NULL,
+    stadium_address  VARCHAR(50)   NOT NULL,
+    stadium_features TEXT          NOT NULL,
+    PRIMARY KEY (stadium_id)
+);
+
+CREATE TABLE league
+(
+    league_name VARCHAR(20) NOT NULL,
+    PRIMARY KEY (league_name)
+);
+
+CREATE TABLE season
+(
+    season_id     SERIAL,
+    season_number INT         NOT NULL CHECK (season_number > 0),
+    league_name   VARCHAR(20) NOT NULL REFERENCES league (league_name) ON DELETE CASCADE,
+    PRIMARY KEY (season_id)
+);
+
+CREATE TABLE week
+(
+    week_id     SERIAL,
+    week_number INT  NOT NULL CHECK (week_number > 0),
+    season_id   INT  NOT NULL REFERENCES season (season_id) ON DELETE CASCADE,
+    start_date  DATE NOT NULL,
+    end_date    DATE NOT NULL,
+    PRIMARY KEY (week_id)
+);
+
+
+
+CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
