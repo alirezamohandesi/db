@@ -52,6 +52,9 @@ CREATE TABLE STADIUM
     PRIMARY KEY (stadium_id)
 );
 
+CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
+
+
 CREATE TABLE league
 (
     league_name VARCHAR(20) NOT NULL,
@@ -144,5 +147,26 @@ CREATE TABLE contract (
     PRIMARY KEY (contract_id)
 );
 
-CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
+CREATE TABLE team_game (
+    team_game_id SERIAL,
+    team_season_id INT NOT NULL REFERENCES team_season(team_season_id) ON DELETE CASCADE,
+    offside_number INT NOT NULL DEFAULT  0 CHECK ( offside_number>= 0 ),
+    dangerous_free_kick_number INT NOT NULL DEFAULT 0 CHECK ( offside_number>=0 ),
+    free_kick_number INT NOT NULL DEFAULT 0 CHECK ( successful_pass>=0 ),
+    successful_pass INT NOT NULL  DEFAULT 0 CHECK (successful_pass >= 0),
+    possession_percentage INT NOT NULL  CHECK (possession_percentage >= 0 AND possession_percentage <= 100),
+    pass_number INT NOT NULL DEFAULT 0 CHECK (pass_number >= 0),
+    corner_number INT NOT NULL DEFAULT 0 CHECK (corner_number >= 0)
+);
+
+CREATE TABLE game (
+    game_id SERIAL,
+    home_team_game_id INT NOT NULL REFERENCES team_game(team_game_id) ON DELETE CASCADE,
+    away_team_game_id INT NOT NULL REFERENCES team_game(team_game_id) ON DELETE CASCADE,
+    stadium_id INT NOT NULL REFERENCES STADIUM(stadium_id) ON DELETE CASCADE,
+    week_id INT NOT NULL REFERENCES week(week_id) ON DELETE CASCADE,
+    game_date DATE NOT NULL,
+    result VARCHAR(20) NOT NULL CHECK ( result LIKE '[0-9]{1,2}:[0-9]{1,2}' ),
+    PRIMARY KEY (game_id)
+);
 CREATE TYPE transfer_type AS ENUM ('buy' , 'sell');
