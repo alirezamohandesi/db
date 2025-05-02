@@ -166,7 +166,26 @@ CREATE TABLE game (
     stadium_id INT NOT NULL REFERENCES STADIUM(stadium_id) ON DELETE CASCADE,
     week_id INT NOT NULL REFERENCES week(week_id) ON DELETE CASCADE,
     game_date DATE NOT NULL,
-    result VARCHAR(20) NOT NULL CHECK ( result LIKE '[0-9]{1,2}:[0-9]{1,2}' ),
+    result VARCHAR(5) NOT NULL CHECK ( result LIKE '[0-9]{1,2}:[0-9]{1,2}' ),
     PRIMARY KEY (game_id)
 );
+
+CREATE TABLE player_game (
+    player_game_id SERIAL,
+    team_game_id INT NOT NULL,
+    contract_id INT NOT NULL,
+    type player_game_type NOT NULL,
+    FOREIGN KEY (team_game_id) REFERENCES team_game(team_game_id),
+    FOREIGN KEY (contract_id) REFERENCES contract(contract_id),
+    PRIMARY KEY (player_game_id)
+);
+
+CREATE TABLE event(
+    event_id SERIAL,
+    game_id INT NOT NULL,
+    minute VARCHAR(2) NOT NULL CHECK (minute LIKE '[0-9]{1,2}'),
+    FOREIGN KEY (game_id) REFERENCES game(game_id),
+    PRIMARY KEY (event_id)
+);
+CREATE TYPE player_game_type AS ENUM ('substitute' , 'in-game');
 CREATE TYPE transfer_type AS ENUM ('buy' , 'sell');
