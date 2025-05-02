@@ -76,6 +76,16 @@ CREATE TABLE week
     PRIMARY KEY (week_id)
 );
 
+CREATE TABLE team_season (
+    team_season_id SERIAL,
+    season_id INT NOT NULL,
+    team_id INT NOT NULL,
+    point SMALLINT NOT NULL DEFAULT 0,
+    rank SMALLINT NOT NULL,
+    FOREIGN KEY (team_id) REFERENCES team(team_id),
+    FOREIGN KEY (season_id) REFERENCES season(season_id),
+    PRIMARY KEY (team_season_id)
+);
 
 
 CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
