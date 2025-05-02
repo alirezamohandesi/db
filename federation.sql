@@ -94,5 +94,55 @@ CREATE TABLE referee_committee (
     season_id INT NOT NULL REFERENCES season(season_id) ON DELETE CASCADE,
     PRIMARY KEY (committee_id)
 );
+CREATE TABLE foreign_transfer(
+    foreign_team_name VARCHAR(20) NOT NULL,
+    foreign_team_country VARCHAR(20) NOT NULL,
+    internal_team_id INT NOT NULL,
+    player_id INT NOT NULL,
+    player_monthly_wage INT NOT NULL,
+    type transfer_type NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (internal_team_id) REFERENCES team_season(team_season_id),
+    PRIMARY KEY (foreign_team_name,foreign_team_country,internal_team_id,player_id)
+);
+
+CREATE TABLE internal_transfer(
+    seller_id INT NOT NULL,
+    buyer_id INT NOT NULL,
+    player_id INT NOT NULL,
+    player_monthly_wage INT NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (seller_id) REFERENCES team_season(team_season_id),
+    FOREIGN KEY (buyer_id) REFERENCES team_season(team_season_id),
+    PRIMARY KEY (seller_id,buyer_id,player_id)
+);
+
+CREATE TABLE termination_contract (
+    team_season_id INT NOT NULL,
+    player_id INT NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id),
+    PRIMARY KEY (team_season_id,player_id)
+);
+
+CREATE TABLE buy_free_player (
+    team_season_id INT NOT NULL,
+    player_id INT NOT NULL,
+    player_monthly_wage INT NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id),
+    PRIMARY KEY (team_season_id,player_id)
+);
+
+CREATE TABLE contract (
+    contract_id SERIAL,
+    team_season_id INT NOT NULL,
+    player_id INT NOT NULL,
+    player_monthly_wage INT NOT NULL,
+    FOREIGN KEY (player_id) REFERENCES player(player_id),
+    FOREIGN KEY (team_season_id) REFERENCES team_season(team_season_id),
+    PRIMARY KEY (contract_id)
+);
 
 CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
+CREATE TYPE transfer_type AS ENUM ('buy' , 'sell');
