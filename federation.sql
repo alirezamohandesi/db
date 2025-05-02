@@ -87,5 +87,12 @@ CREATE TABLE team_season (
     PRIMARY KEY (team_season_id)
 );
 
+CREATE TABLE referee_committee (
+    committee_id SERIAL,
+    members TEXT ,
+    period INT NOT NULL CHECK (period > 0),
+    season_id INT NOT NULL REFERENCES season(season_id) ON DELETE CASCADE,
+    PRIMARY KEY (committee_id)
+);
 
 CREATE TYPE stadium_level AS ENUM ('international' , 'local' , 'regional' , 'national');
